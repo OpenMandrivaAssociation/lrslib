@@ -1,0 +1,127 @@
+--- ./lrsgmp.c.orig	2009-09-10 12:40:50.000000000 -0600
++++ ./lrsgmp.c	2009-09-10 12:40:50.000000000 -0600
+@@ -7,6 +7,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include "lrsgmp.h"
+ 
+ long lrs_digits;		/* max permitted no. of digits   */
+--- ./2gnash.c.orig	2009-09-10 12:40:50.000000000 -0600
++++ ./2gnash.c	2009-09-10 12:40:50.000000000 -0600
+@@ -8,6 +8,7 @@
+        #include <stdlib.h>
+        #include <unistd.h>
+        #include <stdio.h>
++       #include <fcntl.h>
+ 
+        int main(int argc, char *argv[])
+ 	       {
+@@ -27,14 +28,16 @@
+ 		      if(cpid[l-1] == 0) {
+ 			 //forked threads
+ 			// n= sprintf(buffer, "lrs %s > out%i", argv[l], l);
++                         int n = sprintf(buffer, "out%i", l);
++			 int fd = creat(buffer, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
++                         dup2(fd, 1);
+                          if(l==1) {
+-                              int n= sprintf(buffer, "gnash %s %s > out%i", argv[1], argv[2], l);
++                              execlp("lrs-nash", "lrs-nash", argv[1], argv[2], NULL);
+                          }
+                          else     {
+-                              int n= sprintf(buffer, "gnash %s %s > out%i", argv[2], argv[1], l);
++                              execlp("lrs-nash", "lrs-nash", argv[2], argv[1], NULL);
+                          }
+ 
+-			 int i=system(buffer);
+                           _exit(0);
+ 		      }
+ 		  }
+@@ -44,24 +47,24 @@
+ 		      if(w == cpid[j-1]) {
+ 			  // this child finished first
+                           if(j==1)
+-			      printf("gnash %s %s   finished first\n", argv[1], argv[2]);
++			      printf("lrs-nash %s %s   finished first\n", argv[1], argv[2]);
+                           else {
+-			      printf("gnash %s %s   finished first\n", argv[2], argv[1]);
++			      printf("lrs-nash %s %s   finished first\n", argv[2], argv[1]);
+ 			      printf("player numbers will be reversed in output\n");
+                                }
++                           int n = sprintf(buffer, "out%i", j);
+                            if(argc == 4) {
+ 			       printf("output file: %s\n", argv[3]);
+-			       int n = sprintf(buffer, "/bin/mv -f out%i %s", j, argv[3]);
++                               rename(buffer, argv[3]);
+                            }
+                            else  {
+-			        printf("output file: out\n", argv[2], argv[1]);
+-			        int n = sprintf(buffer, "/bin/mv -f out%i out", j);
++			        printf("output file: out\n");
++                                rename(buffer, "out");
+                            }
+-			  int i = system(buffer);
+ 		      } else {
+ 			 // printf("terminating lrs of file %s\n", argv[j]);
+-			  int n = sprintf(buffer, "/bin/rm -f out%i", j);
+-			  int i = system(buffer);
++                          int n = sprintf(buffer, "out%i", j);
++                          unlink(buffer);
+ 		      }
+ 		  }
+                   printf("the other process will be ");   /*...will be killed */
+--- ./lrslong.c.orig	2009-09-10 12:40:50.000000000 -0600
++++ ./lrslong.c	2009-09-10 12:40:50.000000000 -0600
+@@ -7,6 +7,7 @@
+ 
+ #include <stdio.h>
+ #include <stdlib.h>
++#include <string.h>
+ #include "lrslong.h"
+ 
+ long digits;
+--- ./buffer.c.orig	2009-09-10 12:40:52.000000000 -0600
++++ ./buffer.c	2009-09-10 12:40:52.000000000 -0600
+@@ -70,7 +70,7 @@ main(int argc, char *argv[])
+ /* getline from KR P.32 */
+ int Getline(void)
+ {
+-	int c,i;
++	int c=EOF,i;
+ 	extern int maxline;
+         extern char *line;
+ 
+--- ./lrslib.html.orig	2009-09-10 12:40:50.000000000 -0600
++++ ./lrslib.html	2009-09-10 12:40:50.000000000 -0600
+@@ -145,7 +145,7 @@ of the driver, and does basic setup func
+ some information about version numer or lrslib and which arithmetic package
+ is used. FALSE is returned in case of failure.</font></blockquote>
+ 
+-<p><br><font color="#990000">lrs_dat&nbsp; *lrs_alloc_dat (char *name);&nbsp;&nbsp;&nbsp;
++<p><br><font color="#990000">lrs_dat&nbsp; *lrs_alloc_dat (const char *name);&nbsp;&nbsp;&nbsp;
+ /* allocate for lrs_dat structure "name"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+ */</font>
+ <br>&nbsp;
+--- ./lrslib.h.orig	2010-07-07 01:58:36.000000000 -0600
++++ ./lrslib.h	2010-07-07 01:58:36.000000000 -0600
+@@ -218,7 +218,7 @@ extern lrs_dic *PBnew;    /* we will sav
+ long lrs_main (int argc, char *argv[]);    /* lrs driver, argv[1]=input file, [argc-1]=output file */
+ long redund_main (int argc, char *argv[]); /* redund driver, argv[1]=input file, [2]=output file */
+ 
+-lrs_dat *lrs_alloc_dat (char *name);	/* allocate for lrs_dat structure "name"       */
++lrs_dat *lrs_alloc_dat (const char *name);	/* allocate for lrs_dat structure "name"       */
+ lrs_dic *lrs_alloc_dic (lrs_dat * Q);	/* allocate for lrs_dic structure corr. to Q   */
+ 
+ void lrs_estimate (lrs_dic * P, lrs_dat * Q);	/* get estimates only                          */
+--- ./lrslib.c.orig	2012-05-31 23:20:49.000000000 -0600
++++ ./lrslib.c	2012-08-13 14:54:20.155363341 -0600
+@@ -560,7 +560,7 @@ lrs_close (char *name)
+ /* allocate and initialize lrs_dat */
+ /***********************************/
+ lrs_dat *
+-lrs_alloc_dat (char *name)
++lrs_alloc_dat (const char *name)
+ {
+   lrs_dat *Q;
+   long i;
