@@ -5,7 +5,7 @@
 Name:           lrslib
 Group:          Sciences/Mathematics
 Version:        4.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        Reverse search for vertex enumeration/convex hull problems
 
 %global upver 0%(echo %{version} | sed 's/\\.//')
