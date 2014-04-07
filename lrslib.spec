@@ -5,7 +5,7 @@
 Name:           lrslib
 Group:          Sciences/Mathematics
 Version:        4.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        Reverse search for vertex enumeration/convex hull problems
 
 %global upver 0%(echo %{version} | sed 's/\\.//')
@@ -49,6 +49,7 @@ with very large output sizes can sometimes be solved.
 %package -n %{liblrs_devel}
 Summary:        Header files and libraries for developing with %{name}
 Requires:       %{liblrs}%{?_isa} = %{version}-%{release}
+Provides:       %{name}-devel = %{version}-%{release}
 Requires:       gmp-devel%{?_isa}
 
 %description -n %{liblrs_devel}
@@ -159,27 +160,3 @@ done
 %doc lrslib.html chdemo.c lpdemo.c vedemo.c
 %{_includedir}/%{name}
 %{_libdir}/*.so
-
-%changelog
-* Tue Jan 22 2013 pcpa <paulo.cesar.pereira.de.andrade@gmail.com> - 4.3-2
-- Minor changes to adapt to Mandriva
-
-* Mon Aug 13 2012 Jerry James <loganjerry@gmail.com> - 4.3-1
-- New upstream release
-
-* Thu Jul 19 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 4.2c-5
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
-
-* Fri Mar 16 2012 Jerry James <loganjerry@gmail.com> - 4.2c-4
-- Apply patch from Thomas Rehn to fix a memory leak
-
-* Tue Feb 14 2012 Jerry James <loganjerry@gmail.com> - 4.2c-3
-- Change subpackage structure based on review
-
-* Wed Aug 24 2011 Jerry James <loganjerry@gmail.com> - 4.2c-2
-- Use %%{name} more liberally.
-- Use %%global instead of %%define.
-- Add man pages.
-
-* Wed Jul 20 2011 Jerry James <loganjerry@gmail.com> - 4.2c-1
-- Initial RPM
