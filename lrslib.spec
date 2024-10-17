@@ -11,7 +11,7 @@ Summary:        Reverse search for vertex enumeration/convex hull problems
 %global upver 0%(echo %{version} | sed 's/\\.//')
 
 License:        GPLv2+
-URL:            http://cgm.cs.mcgill.ca/~avis/C/lrs.html
+URL:            https://cgm.cs.mcgill.ca/~avis/C/lrs.html
 Source0:        http://cgm.cs.mcgill.ca/~avis/C/%{name}/%{name}-%{upver}.tar.gz
 # These man pages were written by Jerry James.  Text from the sources was used,
 # therefore the man pages have the same copyright and license as the sources.
